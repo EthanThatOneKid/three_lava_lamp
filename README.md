@@ -1,38 +1,43 @@
-# create-svelte
+# Lava lamp
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+## Prompt
 
-## Creating a project
+Lava lamp
 
-If you're seeing this, you've probably already done this step. Congrats!
+[Wikipedia: Lava lamp](https://en.wikipedia.org/wiki/Lava_lamp)
+[Reddit: /r/Lavalamps](https://www.reddit.com/r/Lavalamps/)
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Artwork
 
-# create a new project in my-app
-npm create svelte@latest my-app
+I wrote my solution for today's challenge in a Deno file and bundled it for use in the browser.
+
+Bundle the `main.ts` file with the following command:
+
+```sh
+deno task bundle
 ```
 
-## Developing
+Then open the `./static/index.html` file in your browser after spinning up a local file server.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```sh
+deno task start
 ```
 
-## Building
+### GIF
 
-To create a production version of your app:
+<!-- ![genuary-2024-12](https://user-images.githubusercontent.com/31261035/210199573-22d30ad7-f175-408a-b38c-05f0b9e5b588.gif) -->
 
-```bash
-npm run build
-```
+### Program
 
-You can preview the production build with `npm run preview`.
+The code for the program that visualizes the lava lamp is found within this directory.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+Feel free to use the code for your own projects.
+
+### Reference
+
+- <https://threejs.org/examples/webgl_marchingcubes.html>
+- <https://discourse.threejs.org/t/definitive-glass-material/22888/2>
+
+---
+
+Created with 💖 by [**@EthanThatOneKid**](https://etok.codes/)
