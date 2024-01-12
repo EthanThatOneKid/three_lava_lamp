@@ -29,6 +29,7 @@ let effectController: {
 	resolution: number;
 	isolation: number;
 	floor: boolean;
+	ceiling: boolean;
 	wallx: boolean;
 	wallz: boolean;
 };
@@ -60,7 +61,7 @@ export function init() {
 	light.position.set(0.5, 0.5, 1);
 	scene.add(light);
 
-	pointLight = new THREE.PointLight(0xff7c00, 3, 0, 0);
+	pointLight = new THREE.PointLight(0xffffff, 3, 0, 0);
 	pointLight.position.set(0, 0, 100);
 	scene.add(pointLight);
 
@@ -70,7 +71,7 @@ export function init() {
 	// MATERIALS
 
 	materials = generateMaterials();
-	current_material = 'shiny';
+	current_material = 'plastic';
 
 	// MARCHING CUBES
 
@@ -122,25 +123,6 @@ function onWindowResize() {
 }
 
 function generateMaterials() {
-	// environment map
-
-	const path = 'textures/cube/SwedishRoyalCastle/';
-	const format = '.jpg';
-	const urls = [
-		path + 'px' + format,
-		path + 'nx' + format,
-		path + 'py' + format,
-		path + 'ny' + format,
-		path + 'pz' + format,
-		path + 'nz' + format
-	];
-
-	const cubeTextureLoader = new THREE.CubeTextureLoader();
-
-	const reflectionCube = cubeTextureLoader.load(urls);
-	const refractionCube = cubeTextureLoader.load(urls);
-	refractionCube.mapping = THREE.CubeRefractionMapping;
-
 	// toons
 
 	const toonMaterial1 = createShaderMaterial(
@@ -164,25 +146,17 @@ function generateMaterials() {
 		ambientLight
 	);
 
-	const texture = new THREE.TextureLoader().load('textures/uv_grid_opengl.jpg');
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	texture.colorSpace = THREE.SRGBColorSpace;
-
 	const materials = {
 		shiny: new THREE.MeshStandardMaterial({
 			color: 0x9c0000,
-			envMap: reflectionCube,
 			roughness: 0.1,
 			metalness: 1.0
 		}),
 		chrome: new THREE.MeshLambertMaterial({
-			color: 0xffffff,
-			envMap: reflectionCube
+			color: 0xffffff
 		}),
 		liquid: new THREE.MeshLambertMaterial({
 			color: 0xffffff,
-			envMap: refractionCube,
 			refractionRatio: 0.85
 		}),
 		matte: new THREE.MeshPhongMaterial({ specular: 0x494949, shininess: 1 }),
@@ -192,8 +166,7 @@ function generateMaterials() {
 		textured: new THREE.MeshPhongMaterial({
 			color: 0xffffff,
 			specular: 0x111111,
-			shininess: 1,
-			map: texture
+			shininess: 1
 		}),
 		colors: new THREE.MeshPhongMaterial({
 			color: 0xffffff,
@@ -207,7 +180,8 @@ function generateMaterials() {
 		}),
 		plastic: new THREE.MeshPhongMaterial({
 			specular: 0xc1c1c1,
-			shininess: 250
+			shininess: 250,
+			color: 0x00ff00
 		}),
 		toon1: toonMaterial1,
 		toon2: toonMaterial2,
@@ -257,7 +231,7 @@ function setupGui() {
 	}
 
 	effectController = {
-		material: 'shiny',
+		material: 'plastic',
 
 		speed: 1.0,
 		numBlobs: 10,
@@ -265,6 +239,7 @@ function setupGui() {
 		isolation: 80,
 
 		floor: true,
+		ceiling: true,
 		wallx: false,
 		wallz: false
 	};
@@ -292,6 +267,7 @@ function setupGui() {
 	h.add(effectController, 'isolation', 10, 300, 1);
 
 	h.add(effectController, 'floor');
+	h.add(effectController, 'ceiling');
 	h.add(effectController, 'wallx');
 	h.add(effectController, 'wallz');
 }
@@ -303,6 +279,7 @@ function updateCubes(
 	time: number,
 	numblobs: number,
 	floor: boolean,
+	ceiling: boolean,
 	wallx: boolean,
 	wallz: boolean
 ) {
@@ -334,7 +311,9 @@ function updateCubes(
 		}
 	}
 
-	if (floor) object.addPlaneY(2, 12);
+	// if (floor) object.addPlaneY(2, 12);
+	// if (floor) object.addPlaneY(2, Math.sin(time) * 40 + 60);
+	if (ceiling) object.addPlaneY(2, 60);
 	if (wallz) object.addPlaneZ(2, 12);
 	if (wallx) object.addPlaneX(2, 12);
 
@@ -371,6 +350,7 @@ function render() {
 		time,
 		effectController.numBlobs,
 		effectController.floor,
+		effectController.ceiling,
 		effectController.wallx,
 		effectController.wallz
 	);
