@@ -34,8 +34,8 @@ export function init() {
 
 	// CAMERA
 
-	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-	camera.position.set(-6000, 500, 1500);
+	camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 10000);
+	camera.position.set(-6000, 500, 2800);
 
 	// SCENE
 
@@ -49,7 +49,7 @@ export function init() {
 	scene.add(light);
 
 	pointLight = new THREE.PointLight(0xffffff, 3, 0, 0);
-	pointLight.position.set(0, 0, 100);
+	pointLight.position.set(0, 600, 0);
 	scene.add(pointLight);
 
 	ambientLight = new THREE.AmbientLight(0x323232, 3);
@@ -94,11 +94,27 @@ export function init() {
 
 	// TODO: ACCENTS. Render container of lava lamp.
 
+	const accentColor = 0xff0000; // 0x000000;
 	const topGeometry = new THREE.CylinderGeometry(300, 420, 600, 32);
-	const topMaterial = new THREE.MeshPhongMaterial({ color: 0x00000, shininess: 200 });
+	const topMaterial = new THREE.MeshPhongMaterial({ color: accentColor, shininess: 200 });
 	const top = new THREE.Mesh(topGeometry, topMaterial);
 	top.position.set(0, 1200, 0);
 	scene.add(top);
+
+	const bottomTopHalfGeometry = new THREE.CylinderGeometry(800, 300, 600, 32);
+	const bottomTopHalfMaterial = new THREE.MeshPhongMaterial({ color: accentColor, shininess: 200 });
+	const bottomTopHalf = new THREE.Mesh(bottomTopHalfGeometry, bottomTopHalfMaterial);
+	bottomTopHalf.position.set(0, -900, 0);
+	scene.add(bottomTopHalf);
+
+	const bottomBottomHalfGeometry = new THREE.CylinderGeometry(300, 800, 800, 32);
+	const bottomBottomHalfMaterial = new THREE.MeshPhongMaterial({
+		color: accentColor,
+		shininess: 200
+	});
+	const bottomBottomHalf = new THREE.Mesh(bottomBottomHalfGeometry, bottomBottomHalfMaterial);
+	bottomBottomHalf.position.set(0, -1499, 0);
+	scene.add(bottomBottomHalf);
 
 	// RENDERER
 
@@ -139,9 +155,9 @@ function onWindowResize() {
 function setupGUI() {
 	effectController = {
 		speed: 1.0,
-		amount: 10,
-		resolution: 28,
-		isolation: 80
+		amount: 12,
+		resolution: 32,
+		isolation: 25
 	};
 
 	const gui = new GUI();
