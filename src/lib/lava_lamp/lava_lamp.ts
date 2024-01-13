@@ -3,35 +3,22 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes.js';
-import {
-	ToonShader1,
-	ToonShader2,
-	ToonShaderDotted,
-	ToonShaderHatching
-} from 'three/examples/jsm/shaders/ToonShader.js';
 
 let container: HTMLElement | null;
 let stats: Stats;
 let camera: THREE.PerspectiveCamera;
 let scene: THREE.Scene;
 let renderer: THREE.WebGLRenderer;
-let materials: Record<string, THREE.Material>;
-let current_material: string;
 let light: THREE.DirectionalLight;
 let pointLight: THREE.PointLight;
 let ambientLight: THREE.AmbientLight;
-let effect: MarchingCubes;
+let marchingCubes: MarchingCubes;
 let resolution: number;
 let effectController: {
-	material: string;
 	speed: number;
-	numBlobs: number;
+	amount: number;
 	resolution: number;
 	isolation: number;
-	floor: boolean;
-	ceiling: boolean;
-	wallx: boolean;
-	wallz: boolean;
 };
 
 let time = 0;
@@ -68,23 +55,23 @@ export function init() {
 	ambientLight = new THREE.AmbientLight(0x323232, 3);
 	scene.add(ambientLight);
 
-	// MATERIALS
-
-	materials = generateMaterials();
-	current_material = 'plastic';
-
 	// MARCHING CUBES
 
 	resolution = 28;
 
-	effect = new MarchingCubes(resolution, materials[current_material], true, true, 100000);
-	effect.position.set(0, 0, 0);
-	effect.scale.set(700, 700, 700);
+	const material = new THREE.MeshPhongMaterial({
+		specular: 0xc1c1c1,
+		shininess: 250,
+		color: 0x00ff00
+	});
+	marchingCubes = new MarchingCubes(resolution, material, true, true, 100000);
+	marchingCubes.position.set(0, 0, 0);
+	marchingCubes.scale.set(700, 700, 700);
 
-	effect.enableUvs = false;
-	effect.enableColors = false;
+	marchingCubes.enableUvs = false;
+	marchingCubes.enableColors = false;
 
-	scene.add(effect);
+	scene.add(marchingCubes);
 
 	// RENDERER
 
@@ -106,7 +93,7 @@ export function init() {
 
 	// GUI
 
-	setupGui();
+	setupGUI();
 
 	// EVENTS
 
@@ -122,205 +109,54 @@ function onWindowResize() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function generateMaterials() {
-	// toons
-
-	const toonMaterial1 = createShaderMaterial(
-		ToonShader1 as unknown as THREE.ShaderMaterial,
-		light,
-		ambientLight
-	);
-	const toonMaterial2 = createShaderMaterial(
-		ToonShader2 as unknown as THREE.ShaderMaterial,
-		light,
-		ambientLight
-	);
-	const hatchingMaterial = createShaderMaterial(
-		ToonShaderHatching as unknown as THREE.ShaderMaterial,
-		light,
-		ambientLight
-	);
-	const dottedMaterial = createShaderMaterial(
-		ToonShaderDotted as unknown as THREE.ShaderMaterial,
-		light,
-		ambientLight
-	);
-
-	const materials = {
-		shiny: new THREE.MeshStandardMaterial({
-			color: 0x9c0000,
-			roughness: 0.1,
-			metalness: 1.0
-		}),
-		chrome: new THREE.MeshLambertMaterial({
-			color: 0xffffff
-		}),
-		liquid: new THREE.MeshLambertMaterial({
-			color: 0xffffff,
-			refractionRatio: 0.85
-		}),
-		matte: new THREE.MeshPhongMaterial({ specular: 0x494949, shininess: 1 }),
-		flat: new THREE.MeshLambertMaterial({
-			/*TODO flatShading: true */
-		}),
-		textured: new THREE.MeshPhongMaterial({
-			color: 0xffffff,
-			specular: 0x111111,
-			shininess: 1
-		}),
-		colors: new THREE.MeshPhongMaterial({
-			color: 0xffffff,
-			specular: 0xffffff,
-			shininess: 2,
-			vertexColors: true
-		}),
-		multiColors: new THREE.MeshPhongMaterial({
-			shininess: 2,
-			vertexColors: true
-		}),
-		plastic: new THREE.MeshPhongMaterial({
-			specular: 0xc1c1c1,
-			shininess: 250,
-			color: 0x00ff00
-		}),
-		toon1: toonMaterial1,
-		toon2: toonMaterial2,
-		hatching: hatchingMaterial,
-		dotted: dottedMaterial
-	};
-
-	return materials;
-}
-
-function createShaderMaterial(
-	shader: THREE.ShaderMaterial,
-	light: THREE.DirectionalLight,
-	ambientLight: THREE.AmbientLight
-) {
-	const u = THREE.UniformsUtils.clone(shader.uniforms);
-
-	const vs = shader.vertexShader;
-	const fs = shader.fragmentShader;
-
-	const material = new THREE.ShaderMaterial({
-		uniforms: u,
-		vertexShader: vs,
-		fragmentShader: fs
-	});
-
-	material.uniforms['uDirLightPos'].value = light.position;
-	material.uniforms['uDirLightColor'].value = light.color;
-
-	material.uniforms['uAmbientLightColor'].value = ambientLight.color;
-
-	return material;
-}
-
-//
-
-function setupGui() {
-	function createHandler(id: string) {
-		return () => {
-			current_material = id;
-
-			effect.material = materials[id];
-			effect.enableUvs = current_material === 'textured' ? true : false;
-			effect.enableColors =
-				current_material === 'colors' || current_material === 'multiColors' ? true : false;
-		};
-	}
-
+function setupGUI() {
 	effectController = {
-		material: 'plastic',
-
 		speed: 1.0,
-		numBlobs: 10,
+		amount: 10,
 		resolution: 28,
-		isolation: 80,
-
-		floor: true,
-		ceiling: true,
-		wallx: false,
-		wallz: false
+		isolation: 80
 	};
-
-	let h;
 
 	const gui = new GUI();
 
-	// material (type)
-
-	h = gui.addFolder('Materials');
-
-	for (const m in materials) {
-		effectController[m as keyof typeof effectController] = createHandler(m) as never;
-		h.add(effectController, m as any);
-	}
-
 	// simulation
 
-	h = gui.addFolder('Simulation');
+	let folder = gui.addFolder('Simulation');
 
-	h.add(effectController, 'speed', 0.1, 8.0, 0.05);
-	h.add(effectController, 'numBlobs', 1, 50, 1);
-	h.add(effectController, 'resolution', 14, 100, 1);
-	h.add(effectController, 'isolation', 10, 300, 1);
-
-	h.add(effectController, 'floor');
-	h.add(effectController, 'ceiling');
-	h.add(effectController, 'wallx');
-	h.add(effectController, 'wallz');
+	folder.add(effectController, 'speed', 0.1, 8.0, 0.05);
+	folder.add(effectController, 'amount', 1, 50, 1);
+	folder.add(effectController, 'resolution', 14, 100, 1);
+	folder.add(effectController, 'isolation', 10, 300, 1);
 }
 
 // this controls content of marching cubes voxel field
 
 function updateCubes(
-	object: MarchingCubes,
+	cubes: MarchingCubes,
 	time: number,
-	numblobs: number,
-	floor: boolean,
-	ceiling: boolean,
-	wallx: boolean,
-	wallz: boolean
+	amount: number,
+	subtract = 12,
+	fn: (time: number, i: number) => THREE.Vector3Tuple = (time, i) => [
+		Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5,
+		Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.77, // dip into the floor
+		Math.cos(i + 1.32 * time * 0.1 * Math.sin(0.92 + 0.53 * i)) * 0.27 + 0.5
+	]
 ) {
-	object.reset();
-
-	// fill the field with some metaballs
-
-	const rainbow = [
-		new THREE.Color(0xff0000),
-		new THREE.Color(0xffbb00),
-		new THREE.Color(0xffff00),
-		new THREE.Color(0x00ff00),
-		new THREE.Color(0x0000ff),
-		new THREE.Color(0x9400bd),
-		new THREE.Color(0xc800eb)
-	];
-	const subtract = 12;
-	const strength = 1.2 / ((Math.sqrt(numblobs) - 1) / 4 + 1);
-
-	for (let i = 0; i < numblobs; i++) {
-		const ballx = Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5;
-		const bally = Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.77; // dip into the floor
-		const ballz = Math.cos(i + 1.32 * time * 0.1 * Math.sin(0.92 + 0.53 * i)) * 0.27 + 0.5;
-
-		if (current_material === 'multiColors') {
-			object.addBall(ballx, bally, ballz, strength, subtract, rainbow[i % 7]);
-		} else {
-			object.addBall(ballx, bally, ballz, strength, subtract);
-		}
+	console.log({ cubes });
+	if (!cubes) {
+		return;
 	}
 
-	// if (floor) object.addPlaneY(2, 12);
-	// if (floor) object.addPlaneY(2, Math.sin(time) * 40 + 60);
-	if (ceiling) object.addPlaneY(2, 60);
-	if (wallz) object.addPlaneZ(2, 12);
-	if (wallx) object.addPlaneX(2, 12);
+	cubes.reset();
 
-	object.update();
+	const strength = 1.2 / ((Math.sqrt(amount) - 1) / 4 + 1);
+	for (let i = 0; i < amount; i++) {
+		const [ballx, bally, ballz] = fn(time, i);
+		cubes.addBall(ballx, bally, ballz, strength, subtract);
+	}
+
+	cubes.update();
 }
-
-//
 
 export function animate() {
 	requestAnimationFrame(animate);
@@ -338,22 +174,14 @@ function render() {
 
 	if (effectController.resolution !== resolution) {
 		resolution = effectController.resolution;
-		effect.init(Math.floor(resolution));
+		marchingCubes.init(Math.floor(resolution));
 	}
 
-	if (effectController.isolation !== effect.isolation) {
-		effect.isolation = effectController.isolation;
+	if (marchingCubes && effectController.isolation !== marchingCubes.isolation) {
+		marchingCubes.isolation = effectController.isolation;
 	}
 
-	updateCubes(
-		effect,
-		time,
-		effectController.numBlobs,
-		effectController.floor,
-		effectController.ceiling,
-		effectController.wallx,
-		effectController.wallz
-	);
+	updateCubes(marchingCubes, time, effectController.amount);
 
 	// render
 

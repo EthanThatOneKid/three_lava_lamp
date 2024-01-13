@@ -1,1 +1,1 @@
-export * from "./lava_lamp"
+export * from './lava_lamp';

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-	import  { animate, init } from "$lib/lava_lamp";
+	import { onMount } from 'svelte';
+	import { animate, init } from '$lib/lava_lamp';
 
-  onMount(() => {
-    init();
-    animate();
-  });
+	onMount(() => {
+		init();
+		animate();
+	});
 </script>
 
-<div id="container"/>
+<div id="container" />
