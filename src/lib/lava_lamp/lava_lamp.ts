@@ -3,6 +3,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes.js';
+import { fourierF } from './fourier_epicycles';
 
 let container: HTMLElement | null;
 let stats: Stats;
@@ -66,7 +67,7 @@ export function init() {
 	});
 	marchingCubes = new MarchingCubes(resolution, marchingCubesMaterial, true, true, 100000);
 	marchingCubes.position.set(0, 0, 0);
-	marchingCubes.scale.set(700, 700, 700);
+	marchingCubes.scale.set(600, 600, 600);
 
 	marchingCubes.enableUvs = false;
 	marchingCubes.enableColors = false;
@@ -74,11 +75,25 @@ export function init() {
 	scene.add(marchingCubes);
 
 	// GLASS
+	// https://discourse.threejs.org/t/definitive-glass-material/22888/3
 
-	// const geometry = new THREE.CylinderGeometry(5, 5, 20, 32);
-	// const glassMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-	// const cylinder = new THREE.Mesh(geometry, material);
-	// scene.add(cylinder);
+	const glassGeometry = new THREE.CylinderGeometry(400, 800, 1600, 32);
+	const glassMaterial = new THREE.MeshPhysicalMaterial({
+		metalness: 0.9,
+		roughness: 0.05,
+		envMapIntensity: 0.9,
+		clearcoat: 1,
+		transparent: true,
+		opacity: 0.5,
+		reflectivity: 0.2,
+		ior: 0.9,
+		side: THREE.BackSide
+	});
+	const glass = new THREE.Mesh(glassGeometry, glassMaterial);
+	glass.position.set(0, 200, 0);
+	scene.add(glass);
+
+	// TODO: ACCENTS. Render container of lava lamp.
 
 	// RENDERER
 
@@ -129,7 +144,7 @@ function setupGUI() {
 	// simulation
 
 	const folder = gui.addFolder('Simulation');
-	folder.add(effectController, 'speed', 0.1, 8.0, 0.05);
+	folder.add(effectController, 'speed', 0.1, 100.0, 0.05);
 	folder.add(effectController, 'amount', 1, 50, 1);
 	folder.add(effectController, 'resolution', 14, 100, 1);
 	folder.add(effectController, 'isolation', 10, 300, 1);
@@ -161,6 +176,7 @@ function updateCubes(
 	const strength = 1.2 / ((Math.sqrt(amount) - 1) / 4 + 1);
 	for (let i = 0; i < amount; i++) {
 		const [ballx, bally, ballz] = fn(time, i, amount);
+		console.table({ ballx, bally, ballz });
 		cubes.addBall(ballx, bally, ballz, strength, subtract);
 	}
 
@@ -177,7 +193,7 @@ export function animate() {
 function render() {
 	const delta = clock.getDelta();
 
-	time += delta * effectController.speed * 0.5;
+	time += delta * effectController.speed * 0.1;
 
 	// marching cubes
 
@@ -191,14 +207,6 @@ function render() {
 	}
 
 	updateCubes(marchingCubes, time, effectController.amount);
-
-	// glass
-
-	// const geometry = new THREE.CylinderGeometry( 5, 5, 20, 32 );
-	// const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-	// const cylinder = new THREE.Mesh( geometry, material ); scene.add( cylinder );
-
-	// accents
 
 	// render
 
