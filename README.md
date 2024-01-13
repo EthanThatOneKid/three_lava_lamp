@@ -23,9 +23,9 @@ Then open the `./static/index.html` file in your browser after spinning up a loc
 deno task start
 ```
 
-### GIF
+### Animation
 
-<!-- ![genuary-2024-12](https://user-images.githubusercontent.com/31261035/210199573-22d30ad7-f175-408a-b38c-05f0b9e5b588.gif) -->
+![genuary-2024-12](https://github.com/EthanThatOneKid/three_lava_lamp/assets/31261035/32016864-68a5-4db3-9744-ce9dbd9bcf75)
 
 ### Program
 
