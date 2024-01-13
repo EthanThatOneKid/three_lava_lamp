@@ -42,6 +42,22 @@ export function init() {
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color(0x050505);
 
+	// SKYBOX
+
+	const loader = new THREE.CubeTextureLoader();
+	loader.setPath('skybox/');
+
+	const textureCube = loader.load([
+		'violence_ft.jpg',
+		'violence_bk.jpg',
+		'violence_up.jpg',
+		'violence_dn.jpg',
+		'violence_rt.jpg',
+		'violence_lf.jpg'
+	]);
+
+	scene.background = textureCube;
+
 	// LIGHTS
 
 	light = new THREE.DirectionalLight(0xffffff, 3);
@@ -94,7 +110,7 @@ export function init() {
 
 	// TODO: ACCENTS. Render container of lava lamp.
 
-	const accentColor = 0xff0000; // 0x000000;
+	const accentColor = 0x000000;
 	const topGeometry = new THREE.CylinderGeometry(300, 420, 600, 32);
 	const topMaterial = new THREE.MeshPhongMaterial({ color: accentColor, shininess: 200 });
 	const top = new THREE.Mesh(topGeometry, topMaterial);
@@ -214,6 +230,8 @@ function render() {
 	const delta = clock.getDelta();
 
 	time += delta * effectController.speed * 0.1;
+
+	// point light
 
 	// marching cubes
 
