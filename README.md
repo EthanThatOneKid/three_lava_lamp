@@ -4,23 +4,14 @@
 
 Lava lamp
 
-[Wikipedia: Lava lamp](https://en.wikipedia.org/wiki/Lava_lamp)
-[Reddit: /r/Lavalamps](https://www.reddit.com/r/Lavalamps/)
-
 ## Artwork
 
-I wrote my solution for today's challenge in a Deno file and bundled it for use in the browser.
+I wrote my solution for today's challenge in a SvelteKit project.
 
-Bundle the `main.ts` file with the following command:
-
-```sh
-deno task bundle
-```
-
-Then open the `./static/index.html` file in your browser after spinning up a local file server.
+Run the following command to start the web server:
 
 ```sh
-deno task start
+npm run dev
 ```
 
 ### Animation
@@ -35,8 +26,12 @@ Feel free to use the code for your own projects.
 
 ### Reference
 
+- [Wikipedia: Lava lamp](https://en.wikipedia.org/wiki/Lava_lamp)
+- [Reddit: /r/Lavalamps](https://www.reddit.com/r/Lavalamps/)
+- [X.com: #genuary12](https://twitter.com/hashtag/genuary12)
 - <https://threejs.org/examples/webgl_marchingcubes.html>
 - <https://discourse.threejs.org/t/definitive-glass-material/22888/2>
+- <https://opengameart.org/content/skiingpenguins-skybox-pack>
 
 ---
 
