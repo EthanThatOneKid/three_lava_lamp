@@ -3,7 +3,6 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes.js';
-import { fourierF } from './fourier_epicycles';
 
 let container: HTMLElement | null;
 let stats: Stats;
@@ -95,6 +94,12 @@ export function init() {
 
 	// TODO: ACCENTS. Render container of lava lamp.
 
+	const topGeometry = new THREE.CylinderGeometry(300, 420, 600, 32);
+	const topMaterial = new THREE.MeshPhongMaterial({ color: 0x00000, shininess: 200 });
+	const top = new THREE.Mesh(topGeometry, topMaterial);
+	top.position.set(0, 1200, 0);
+	scene.add(top);
+
 	// RENDERER
 
 	renderer = new THREE.WebGLRenderer();
@@ -176,7 +181,6 @@ function updateCubes(
 	const strength = 1.2 / ((Math.sqrt(amount) - 1) / 4 + 1);
 	for (let i = 0; i < amount; i++) {
 		const [ballx, bally, ballz] = fn(time, i, amount);
-		console.table({ ballx, bally, ballz });
 		cubes.addBall(ballx, bally, ballz, strength, subtract);
 	}
 
