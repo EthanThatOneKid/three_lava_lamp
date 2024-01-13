@@ -10,7 +10,6 @@ let camera: THREE.PerspectiveCamera;
 let scene: THREE.Scene;
 let renderer: THREE.WebGLRenderer;
 let light: THREE.DirectionalLight;
-let pointLight: THREE.PointLight;
 let ambientLight: THREE.AmbientLight;
 let marchingCubes: MarchingCubes;
 let resolution: number;
@@ -19,6 +18,7 @@ let effectController: {
 	amount: number;
 	resolution: number;
 	isolation: number;
+	light: boolean;
 };
 
 let time = 0;
@@ -62,14 +62,8 @@ export function init() {
 
 	light = new THREE.DirectionalLight(0xffffff, 3);
 	light.position.set(0.5, 0.5, 1);
-	scene.add(light);
-
-	pointLight = new THREE.PointLight(0xffffff, 3, 0, 0);
-	pointLight.position.set(0, 600, 0);
-	scene.add(pointLight);
 
 	ambientLight = new THREE.AmbientLight(0x323232, 3);
-	scene.add(ambientLight);
 
 	// MARCHING CUBES
 
@@ -100,7 +94,7 @@ export function init() {
 		clearcoat: 1,
 		transparent: true,
 		opacity: 0.5,
-		reflectivity: 0.2,
+		reflectivity: 0.8,
 		ior: 0.9,
 		side: THREE.BackSide
 	});
@@ -173,7 +167,8 @@ function setupGUI() {
 		speed: 1.0,
 		amount: 12,
 		resolution: 32,
-		isolation: 25
+		isolation: 25,
+		light: false
 	};
 
 	const gui = new GUI();
@@ -185,6 +180,7 @@ function setupGUI() {
 	folder.add(effectController, 'amount', 1, 50, 1);
 	folder.add(effectController, 'resolution', 14, 100, 1);
 	folder.add(effectController, 'isolation', 10, 300, 1);
+	folder.add(effectController, 'light');
 }
 
 // this controls content of marching cubes voxel field
@@ -232,6 +228,23 @@ function render() {
 	time += delta * effectController.speed * 0.1;
 
 	// point light
+	if (effectController.light) {
+		if (scene.getObjectById(light.id) === undefined) {
+			scene.add(light);
+		}
+
+		if (scene.getObjectById(ambientLight.id) === undefined) {
+			scene.add(ambientLight);
+		}
+	} else {
+		if (scene.getObjectById(light.id) !== undefined) {
+			scene.remove(light);
+		}
+
+		if (scene.getObjectById(ambientLight.id) !== undefined) {
+			scene.remove(ambientLight);
+		}
+	}
 
 	// marching cubes
 
